@@ -71,7 +71,3 @@ st.write("Este panel muestra el rendimiento de varios activos financieros.")
 
 # Mostrar DataFrame en la app
 st.dataframe(df)  # Permite scroll y ordenamiento
-
-# Opción para descargar el DataFrame como CSV
-csv = df.to_csv(index=False).encode('utf-8')
-st.download_button("Descargar datos como CSV", csv, "datos_activos.csv", "text/csv", key='download-csv')
