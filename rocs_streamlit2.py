@@ -76,10 +76,10 @@ for i, (ticker, data_ticker) in enumerate(tickers.items(), start=1):
     data = data.ffill()
 
     # Calcular ROC
-    roc_1year = calculate_roc(data, 12)
-    roc_6months = calculate_roc(data, 6)
-    roc_3months = calculate_roc(data, 3)
-    roc_1month = calculate_roc(data, 1)
+    roc_1year = calculate_roc(data, 12) * 100
+    roc_6months = calculate_roc(data, 6) * 100
+    roc_3months = calculate_roc(data, 3) * 100
+    roc_1month = calculate_roc(data, 1) * 100
 
     # Almacenar el valor liquidativo de la última fecha de cierre
     valor_liquidativo = data.iloc[-1]
@@ -99,9 +99,17 @@ for i, (ticker, data_ticker) in enumerate(tickers.items(), start=1):
 # Crear DataFrame con los resultados
 df = pd.DataFrame(results)
 
-# Interfaz con Streamlit
-st.title("Dashboard de Rendimiento de Activos")
-st.write("Este panel muestra el rendimiento de varios activos financieros.")
+# Aplicar estilos condicionales a las columnas ROC
+def highlight_roc(val):
+    color = 'green' if val > 0 else 'red'
+    return f'color: {color}'
 
-# Mostrar DataFrame en la app
-st.dataframe(df)  # Permite scroll y ordenamiento
+styled_df = df.style.applymap(
+    highlight_roc, subset=['ROC 1 Año', 'ROC 6 Meses', 'ROC 3 Meses', 'ROC 1 Mes']
+)
+
+st.title("ROC de Activos")
+st.write("Este panel muestra el ROC de los fondos de mi cartera.")
+
+# Mostrar tabla con colores aplicados
+st.write(styled_df.to_html(), unsafe_allow_html=True)
