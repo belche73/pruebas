@@ -1,31 +1,46 @@
 import streamlit as st
+import os
+import google.generativeai as genai
 
-# Título de la aplicación
-st.title('Mi primera aplicación con Streamlit')
+# Configura la página de Streamlit
+st.set_page_config(
+    page_title="Planificador de Viajes",
+    page_icon="✈️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-# Crear un cuadro de texto
-nombre = st.text_input('¿Cuál es tu nombre?')
+# Título y formulario de entrada
+st.title("✈️ Planificador de Viajes")
+st.write("Ingresa tus preferencias y obten un plan de viaje personalizado.")
 
-# Crear un control deslizante
-edad = st.slider('¿Cuál es tu edad?', 0, 100, 25)
+with st.form(key="travel_form"):
+    destino = st.text_input("¿A dónde quieres viajar?")
+    mes = st.text_input("¿Qué mes quieres viajar?")
+    dias = st.number_input("¿Cuántos días quieres viajar?", min_value=1, step=1)
+    submit_button = st.form_submit_button(label="Planificar viaje")
 
-# Mostrar la información
-if nombre:
-    st.write(f'Hola, {nombre}. Tienes {edad} años.')
+# Genera el plan de viaje con Gemini
+if submit_button:
+    os.environ["API_KEY"] = "AIzaSyCBuIg1-6kl5D4xELrSYwY5dQhuh3M9noo"  # Reemplaza con tu API KEY
+    genai.configure(api_key=os.environ["API_KEY"])
 
-# Botón para mostrar un mensaje
-if st.button('Saludar'):
-    st.success(f'¡Saludos, {nombre}!')
+    generation_config = {
+      "temperature": 1,
+      "top_p": 0.95,
+      "top_k": 40,
+      "max_output_tokens": 8192,
+      "response_mime_type": "text/plain",
+    }
 
-# Mostrar gráficos simples
-import matplotlib.pyplot as plt
-import numpy as np
+    model = genai.GenerativeModel(
+      model_name="gemini-2.0-flash",
+      generation_config=generation_config,
+    )
 
-x = np.linspace(0, 10, 100)
-y = np.sin(x)
+    chat_session = model.start_chat(history=[])
 
-fig, ax = plt.subplots()
-ax.plot(x, y)
-ax.set_title('Gráfico de Seno')
+    pregunta = f"Prepara un plan de viaje a {destino} durante {mes} para {dias} días."
 
-st.pyplot(fig)
+    response = chat_session.send_message(pregunta)
+    st.markdown(response.text) # Muestra el plan en formato markdown
